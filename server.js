@@ -122,6 +122,7 @@ function allEmployed() {
     startInquire();
   });
 }
+
 function allRoles() {
   var query = "SELECT * FROM role";
   connection.query(query, function (err, res) {
@@ -142,4 +143,63 @@ function allDept() {
     }
     startInquire();
   });
+}
+
+function addEmployees() {
+  inquirer
+    .prompt([
+      {
+        name: "firstName",
+        type: "input",
+        message: "What is the employees first name?",
+      },
+
+      {
+        name: "lastName",
+        type: "input",
+        message: "What is the employees last name?",
+      },
+    ])
+    .then((answer) => {
+      console.log(answer);
+      connection.query(
+        "INSERT INTO employee SET ?",
+        {
+          first_name: answer.firstName,
+          last_name: answer.lastName,
+          role_id: 1,
+          manager_id: 0,
+        },
+        function (err) {
+          if (err) throw err;
+          console.log("Congratulations on your new job!");
+          runSearch();
+        }
+      );
+    });
+}
+
+function addDept() {
+  inquirer
+    .prompt([
+      {
+        name: "deptName",
+        type: "input",
+        message: "What is the name of added Department?",
+      },
+    ])
+    .then((answer) => {
+      console.log(answer);
+      connection.query(
+        "INSERT INTO department SET ?",
+        {
+          dept_name: answer.deptName,
+        },
+        function (err) {
+          if (err) throw err;
+          console.log("Congratulations on your new job!");
+          startInquire();
+        }
+      );
+    });
 }
