@@ -47,7 +47,8 @@ function startInquire() {
       ],
     })
     .then(function (answer) {
-      switch (answer.choices) {
+      console.log(answer);
+      switch (answer.choice) {
         case "View all Employees":
           allEmployed();
           break;
@@ -109,4 +110,36 @@ function startInquire() {
           break;
       }
     });
+}
+
+function allEmployed() {
+  var query = "SELECT * FROM employee";
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    for (var i = 0; i < res.length; i++) {
+      console.table([res[i]]);
+    }
+    startInquire();
+  });
+}
+function allRoles() {
+  var query = "SELECT * FROM role";
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    for (var i = 0; i < res.length; i++) {
+      console.table([res[i]]);
+    }
+    startInquire();
+  });
+}
+
+function allDept() {
+  var query = "SELECT * FROM department";
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    for (var i = 0; i < res.length; i++) {
+      console.table([res[i]]);
+    }
+    startInquire();
+  });
 }
