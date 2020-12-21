@@ -15,3 +15,8 @@ var connection = mysql.createConnection({
   password: "mysql",
   database: "employee_tracker_db",
 });
+
+connection.connect(function (err) {
+  if (err) throw err;
+  console.log("connected at " + connection.threadId + "\n");
+});
