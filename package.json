@@ -1,0 +1,24 @@
+{
+  "name": "employee-tracker",
+  "version": "1.0.0",
+  "description": "\"mySQL Database and express server\"",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server",
+    "dev": "nodemon server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "Employee-Management-System"
+  },
+  "author": "Demetri Dillard",
+  "license": "MIT",
+  "dependencies": {
+    "ascii-art": "^2.5.0",
+    "console.table": "^0.10.0",
+    "express": "^4.17.1",
+    "inquirer": "^7.3.3",
+    "mysql": "^2.18.1"
+  }
+}
