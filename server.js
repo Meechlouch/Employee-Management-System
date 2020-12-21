@@ -113,12 +113,19 @@ function startInquire() {
 }
 
 function allEmployed() {
-  var query = "SELECT * FROM employee";
-  connection.query(query, function (err, res) {
+  let allEmployees = `SELECT employee.id, first_name, last_name, title, salary, dept_name
+  FROM employee
+  INNER JOIN role
+  ON employee.role_id  = role.id
+  INNER JOIN department
+  ON role.department_id = department.id;`;
+  connection.query(allEmployees, function (err, res) {
+    console.log(res);
     if (err) throw err;
-    for (var i = 0; i < res.length; i++) {
-      console.table([res[i]]);
-    }
+    // for (var i = 0; i < res.length; i++) {
+    //   console.table([res[i]]);
+    // }
+    console.log(res);
     startInquire();
   });
 }
@@ -162,6 +169,7 @@ function addEmployees() {
     ])
     .then((answer) => {
       console.log(answer);
+
       connection.query(
         "INSERT INTO employee SET ?",
         {
@@ -172,7 +180,7 @@ function addEmployees() {
         },
         function (err) {
           if (err) throw err;
-          console.log("Congratulations on your new job!");
+          console.log("New employee has been added to the database!");
           runSearch();
         }
       );
@@ -185,7 +193,7 @@ function addDept() {
       {
         name: "deptName",
         type: "input",
-        message: "What is the name of added Department?",
+        message: "What is the name of the Department being added?",
       },
     ])
     .then((answer) => {
@@ -197,7 +205,7 @@ function addDept() {
         },
         function (err) {
           if (err) throw err;
-          console.log("Congratulations on your new job!");
+          console.log("New Department added Successfully!");
           startInquire();
         }
       );
