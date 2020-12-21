@@ -19,4 +19,34 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
   if (err) throw err;
   console.log("connected at " + connection.threadId + "\n");
+  startInquire();
 });
+
+function startInquire() {
+  inquirer
+    .prompt({
+      name: "choice",
+      type: "list",
+      message: "What would you like to do?",
+      choices: [
+        "View all Employees",
+        "View All Employees By Department",
+        "View All Employees By Manager",
+        "Add Employees",
+        "Remove Employee",
+        "Update Employee Role",
+        "Update Employee Manager",
+        "View All Roles",
+        "Add Role",
+        "Remove Role",
+        "View All Departments",
+        "Add Department",
+        "Remove Department",
+        "View Total Utilized Budget By Department",
+        "Exit",
+      ],
+    })
+    .then((choices) => {
+      console.log(choices);
+    });
+}
