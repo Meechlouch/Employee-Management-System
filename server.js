@@ -1,26 +1,7 @@
 const inquirer = require("inquirer");
-const mysql = require("mysql");
+const connection = require("./mysql-connection/connection");
 const cTable = require("console.table");
-
-var connection = mysql.createConnection({
-  host: "localhost",
-
-  // Your port; if not 3306
-  port: 3306,
-
-  // Your username
-  user: "root",
-
-  // Your password
-  password: "mysql",
-  database: "employee_tracker_db",
-});
-
-connection.connect(function (err) {
-  if (err) throw err;
-  console.log("connected at " + connection.threadId + "\n");
-  startInquire();
-});
+const ascii = require("ascii-art");
 
 function startInquire() {
   inquirer
@@ -275,3 +256,5 @@ function addRole() {
       );
     });
 }
+
+startInquire();
