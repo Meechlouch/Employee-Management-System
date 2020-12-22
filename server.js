@@ -210,7 +210,12 @@ function addDept() {
         },
         function (err) {
           if (err) throw err;
-          console.log("New Department added Successfully!");
+          connection.query(`SELECT * FROM department;`, (err, res) => {
+            if (err) {
+              console.table(res);
+            }
+          });
+
           startInquire();
         }
       );
@@ -227,4 +232,46 @@ function employeeByDept() {
     console.table(res);
     startInquire();
   });
+}
+
+function addRole() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "addedRole",
+        message: "What is the name of the role you would like to add?",
+      },
+      {
+        type: "number",
+        name: "salary",
+        message: "How much is the yearly salary for this new role?",
+      },
+      {
+        type: "number",
+        name: "roleDeptID",
+        message: "What is the department id number for this new role?",
+      },
+    ])
+    .then((answer) => {
+      console.log(answer);
+      connection.query(
+        "INSERT INTO role SET ?",
+        {
+          title: answer.addedRole,
+          salary: answer.salary,
+          department_id: answer.roleDeptID,
+        },
+        function (err) {
+          if (err) {
+            console.log("You must create a New Department before you create a New Role!");
+          }
+          connection.query(`SELECT * FROM role;`, (err, res) => {
+            if (err) throw err;
+            console.table(res);
+          });
+          startInquire();
+        }
+      );
+    });
 }
