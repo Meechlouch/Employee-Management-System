@@ -54,7 +54,7 @@ function startInquire() {
           break;
 
         case "View All Employees By Department":
-          allEmployedByDept();
+          employeeByDept();
           break;
 
         case "View All Employees By Manager":
@@ -120,12 +120,8 @@ function allEmployed() {
   INNER JOIN department
   ON role.department_id = department.id;`;
   connection.query(allEmployees, function (err, res) {
-    console.log(res);
     if (err) throw err;
-    // for (var i = 0; i < res.length; i++) {
-    //   console.table([res[i]]);
-    // }
-    console.log(res);
+    console.table(res);
     startInquire();
   });
 }
@@ -134,9 +130,7 @@ function allRoles() {
   var query = "SELECT * FROM role";
   connection.query(query, function (err, res) {
     if (err) throw err;
-    for (var i = 0; i < res.length; i++) {
-      console.table([res[i]]);
-    }
+    console.table(res);
     startInquire();
   });
 }
@@ -145,9 +139,7 @@ function allDept() {
   var query = "SELECT * FROM department";
   connection.query(query, function (err, res) {
     if (err) throw err;
-    for (var i = 0; i < res.length; i++) {
-      console.table([res[i]]);
-    }
+    console.table(res);
     startInquire();
   });
 }
@@ -166,22 +158,36 @@ function addEmployees() {
         type: "input",
         message: "What is the employees last name?",
       },
+      {
+        name: "roleId",
+        type: "number",
+        message: "What is the role id number for this employee?",
+      },
+      {
+        name: "managerId",
+        type: "number",
+        message: "What is the manager id number for this employee?",
+      },
     ])
     .then((answer) => {
       console.log(answer);
-
       connection.query(
         "INSERT INTO employee SET ?",
         {
           first_name: answer.firstName,
           last_name: answer.lastName,
-          role_id: 1,
-          manager_id: 0,
+          role_id: answer.roleId,
+          manager_id: answer.managerId,
         },
         function (err) {
           if (err) throw err;
           console.log("New employee has been added to the database!");
-          runSearch();
+          connection.query(`SELECT * FROM employee;`, (err, res) => {
+            if (err) {
+              console.table(res);
+            }
+          });
+          startInquire();
         }
       );
     });
@@ -197,7 +203,6 @@ function addDept() {
       },
     ])
     .then((answer) => {
-      console.log(answer);
       connection.query(
         "INSERT INTO department SET ?",
         {
@@ -210,4 +215,16 @@ function addDept() {
         }
       );
     });
+}
+
+function employeeByDept() {
+  let byDept = `SELECT  department.id, dept_name, first_name, last_name
+	FROM department
+    LEFT JOIN employee
+    ON role_id = department.id;`;
+  connection.query(byDept, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    startInquire();
+  });
 }
