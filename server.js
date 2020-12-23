@@ -162,70 +162,63 @@ function addRole() {
 }
 
 function addEmployee() {
-  // connection.query("SELECT * FROM role;", (err, res) => {
-  //   if (err) throw err;
+  connection.query("SELECT * FROM role;", (err, res) => {
+    if (err) throw err;
 
-  //   console.table(res);
-  // });
-  inquirer
-    .prompt([
-      {
-        type: "list",
-        message: "Will this Employee be filling a Manager role?",
-        name: "manager",
-        choices: ["Yes", "No"],
-      },
-      {
-        name: "firstName",
-        type: "input",
-        message: "What is the Employees First Name?",
-      },
+    console.table(res);
+  });
 
-      {
-        name: "lastName",
-        type: "input",
-        message: "What is the employees Last Name?",
-      },
-      {
-        name: "roleId",
-        type: "number",
-        message: "What is the role id number for this Employee?",
-      },
-      {
-        name: "managerId",
-        type: "number",
-        message: "What is the Manager's ID number?",
-        when: (answer) => {
-          return answer.manager === "No";
-        },
-      },
-    ])
-    .then((answer) => {
-      console.log(answer);
-
-      connection.query(
-        "INSERT INTO employee SET ?",
+  setTimeout(() => {
+    inquirer
+      .prompt([
         {
-          first_name: answer.firstName,
-          last_name: answer.lastName,
-          role_id: answer.roleId,
-          manager_id: answer.managerId,
+          type: "list",
+          message: "Will this Employee be filling a Manager role?",
+          name: "manager",
+          choices: ["Yes", "No"],
         },
-        function (err) {
-          if (err) {
-            console.log(err);
-            console.log("There is no department or role for this employee. Create role or department, than try again.");
-            startInquire();
-          } else {
-            connection.query(`SELECT * FROM employee;`, (err, res) => {
-              if (err) throw err;
-              console.table(res);
-            });
+        {
+          name: "firstName",
+          type: "input",
+          message: "What is the Employees First Name?",
+        },
+
+        {
+          name: "lastName",
+          type: "input",
+          message: "What is the employees Last Name?",
+        },
+        {
+          name: "roleId",
+          type: "number",
+          message: "What is the role id number for this Employee?",
+        },
+        {
+          name: "managerId",
+          type: "number",
+          message: "What is the Manager's ID number?",
+          when: (answer) => {
+            return answer.manager === "No";
+          },
+        },
+      ])
+      .then((answer) => {
+        connection.query(
+          "INSERT INTO employee SET ?",
+          {
+            first_name: answer.firstName,
+            last_name: answer.lastName,
+            role_id: answer.roleId,
+            manager_id: answer.managerId,
+          },
+          function (err) {
+            if (err) throw err;
+            console.log("New Employee Added!");
             startInquire();
           }
-        }
-      );
-    });
+        );
+      });
+  }, 1000);
 }
 
 function allDept() {
@@ -258,6 +251,42 @@ function allEmployed() {
     console.table(res);
     startInquire();
   });
+}
+
+function updateEmployee() {
+  let query = `SELECT title, employee.id, first_name, last_name
+                FROM role
+                LEFT JOIN employee
+                ON role.id = role_id;`;
+  connection.query(query, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+  });
+
+  setTimeout(() => {
+    inquirer
+      .prompt([
+        {
+          type: "number",
+          name: "id",
+          message: "What is the ID# of the employee you wish to update?",
+        },
+        {
+          type: "input",
+          name: "roleID",
+          message: "Please enter the new Role ID Number for this Employee",
+        },
+      ])
+      .then((answer) => {
+        let query = `UPDATE employee SET role_id = ${answer.roleID}
+        WHERE id = ${answer.id};`;
+        connection.query(query, (err, res) => {
+          if (err) throw err;
+          console.table(res);
+          startInquire();
+        });
+      });
+  }, 1000);
 }
 
 // function employeeByDept() {
