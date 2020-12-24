@@ -1,7 +1,28 @@
 const inquirer = require("inquirer");
 const connection = require("./mysql-connection/connection");
-const cTable = require("console.table");
-const ascii = require("ascii-art");
+//const cTable = require("console.table");
+const logo = require("asciiart-logo");
+const config = require("./package.json");
+
+function init() {
+  console.log(
+    logo({
+      name: "Employee Management System",
+      font: "Larry 3D",
+      lineChars: 1,
+      padding: 2,
+      margin: 1,
+      borderColor: "grey",
+      logoColor: "green",
+      textColor: "yellow",
+      version: "1.0.0",
+      description: '"mySQL Database and express server"',
+    }).render()
+  );
+  setTimeout(() => {
+    startInquire();
+  }, 2000);
+}
 
 function startInquire() {
   inquirer
@@ -240,12 +261,13 @@ function allRoles() {
 }
 
 function allEmployed() {
-  let allEmployees = `SELECT employee.id, first_name, last_name, title, salary, dept_name
-  FROM employee
-  INNER JOIN role
-  ON employee.role_id  = role.id
-  INNER JOIN department
-  ON role.department_id = department.id;`;
+  let allEmployees = `SELECT employee.id, CONCAT(first_name, ' ', last_name) AS Employees, 
+    title, salary, dept_name AS 'Department'
+    FROM employee
+    INNER JOIN role
+    ON employee.role_id  = role.id
+    INNER JOIN department
+    ON role.department_id = department.id;`;
   connection.query(allEmployees, function (err, res) {
     if (err) throw err;
     console.table(res);
@@ -253,8 +275,9 @@ function allEmployed() {
   });
 }
 
+//NEEDS TO UPDATE CODE TO SEE ROLE.ID.
 function updateEmployee() {
-  let query = `SELECT title, employee.id, first_name, last_name
+  let query = `SELECT *
                 FROM role
                 LEFT JOIN employee
                 ON role.id = role_id;`;
@@ -289,6 +312,8 @@ function updateEmployee() {
   }, 1000);
 }
 
+function updateManager() {}
+
 // function employeeByDept() {
 //   let byDept = `SELECT  department.id, dept_name, first_name, last_name
 // 	FROM department
@@ -300,5 +325,4 @@ function updateEmployee() {
 //     startInquire();
 //   });
 // }
-
-startInquire();
+init();
