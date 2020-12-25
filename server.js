@@ -369,6 +369,40 @@ function updateEmployee() {
 
 function updateManager() {}
 
+function removeEmployee() {
+  connection.query(`SELECT * FROM employee`, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+  });
+  setTimeout(() => {
+    inquirer
+      .prompt([
+        {
+          type: "number",
+          name: "empID",
+          message: "What is the ID Number of the employee that you would like to remove? ",
+        },
+      ])
+      .then((answer) => {
+        let query = `DELETE FROM employee WHERE employee.id = ${answer.empID};`;
+        connection.query(query, (err) => {
+          if (err) throw err;
+          connection.query(`SELECT * FROM employee;`, (err, res) => {
+            if (err) throw err;
+            console.table(res);
+          });
+        });
+        setTimeout(() => {
+          startInquire();
+        }, 1500);
+      });
+  }, 1000);
+}
+
+function removeRole() {}
+
+function removeDept() {}
+
 // function employeeByDept() {
 //   let byDept = `SELECT  department.id, dept_name, first_name, last_name
 // 	FROM department
