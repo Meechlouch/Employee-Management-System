@@ -399,9 +399,65 @@ function removeEmployee() {
   }, 1000);
 }
 
-function removeRole() {}
+function removeRole() {
+  connection.query(`SELECT * FROM role;`, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+  });
+  setTimeout(() => {
+    inquirer
+      .prompt([
+        {
+          type: "number",
+          name: "roleID",
+          message: "What is the id number of the role you would like to delete?",
+        },
+      ])
+      .then((answer) => {
+        let query = `DELETE FROM role WHERE role.id = ${answer.roleID};`;
+        connection.query(query, (err) => {
+          if (err) throw err;
+          connection.query(`SELECT * FROM role;`, (err, res) => {
+            if (err) throw err;
+            console.table(res);
+          });
+        });
+        setTimeout(() => {
+          startInquire();
+        }, 1000);
+      });
+  }, 1000);
+}
 
-function removeDept() {}
+function removeDept() {
+  connection.query(`SELECT * FROM department;`, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+  });
+  setTimeout(() => {
+    inquirer
+      .prompt([
+        {
+          type: "number",
+          name: "deptID",
+          message: "What is the id number of the department that you would like to remove?",
+        },
+      ])
+      .then((answer) => {
+        let query = `DELETE FROM department WHERE department.id = ${answer.deptID};`;
+        connection.query(query, (err) => {
+          if (err) throw err;
+          connection.query(`SELECT * FROM department;`, (err, res) => {
+            if (err) throw err;
+            console.table(res);
+          });
+        });
+        setTimeout(() => {
+          startInquire();
+        }, 1000);
+      });
+  }, 1000);
+}
 
 // function employeeByDept() {
 //   let byDept = `SELECT  department.id, dept_name, first_name, last_name
