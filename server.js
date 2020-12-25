@@ -1,6 +1,6 @@
 const inquirer = require("inquirer");
 const connection = require("./mysql-connection/connection");
-//const cTable = require("console.table");
+const cTable = require("console.table");
 const logo = require("asciiart-logo");
 const config = require("./package.json");
 
@@ -12,7 +12,7 @@ function init() {
       lineChars: 1,
       padding: 2,
       margin: 1,
-      borderColor: "grey",
+      borderColor: "magenta",
       logoColor: "green",
       textColor: "yellow",
       version: "1.0.0",
@@ -183,12 +183,17 @@ function addRole() {
 }
 
 function addEmployee() {
-  connection.query("SELECT * FROM role;", (err, res) => {
+  let query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
+	role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
+    department_id AS 'Dept ID#', department.dept_name AS 'Department',
+    CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
+    FROM employee INNER JOIN role on role.id = employee.role_id 
+    INNER JOIN department on department.id = role.department_id 
+    LEFT JOIN employee e on employee.manager_id = e.id;`;
+  connection.query(query, function (err, res) {
     if (err) throw err;
-
     console.table(res);
   });
-
   setTimeout(() => {
     inquirer
       .prompt([
@@ -233,9 +238,15 @@ function addEmployee() {
             manager_id: answer.managerId,
           },
           function (err) {
-            if (err) throw err;
-            console.log("New Employee Added!");
-            startInquire();
+            if (err) {
+              console.log("You must create a New Department before you create a New Role!");
+              startInquire();
+            }
+            connection.query(`SELECT * FROM employee;`, (err, res) => {
+              if (err) throw err;
+              console.table(res);
+              startInquire();
+            });
           }
         );
       });
@@ -260,15 +271,23 @@ function allRoles() {
   });
 }
 
+/*`SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
+	role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
+    department_id AS 'Dept ID#', department.dept_name AS 'Department',
+    CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
+    FROM employee INNER JOIN role ON role.id = employee.role_id 
+    INNER JOIN department ON department.id = role.department_id 
+    LEFT JOIN employee e ON employee.manager_id = e.id;`;*/
+
 function allEmployed() {
-  let allEmployees = `SELECT employee.id, CONCAT(first_name, ' ', last_name) AS Employees, 
-    title, salary, dept_name AS 'Department'
-    FROM employee
-    INNER JOIN role
-    ON employee.role_id  = role.id
-    INNER JOIN department
-    ON role.department_id = department.id;`;
-  connection.query(allEmployees, function (err, res) {
+  let query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
+	role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
+    department_id AS 'Dept ID#', department.dept_name AS 'Department',
+    CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
+    FROM employee INNER JOIN role ON role.id = employee.role_id 
+    INNER JOIN department ON department.id = role.department_id 
+    LEFT JOIN employee e ON employee.manager_id = e.id;`;
+  connection.query(query, function (err, res) {
     if (err) throw err;
     console.table(res);
     startInquire();
