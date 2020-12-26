@@ -95,7 +95,7 @@ function startInquire() {
           break;
 
         case "View All Employees By Manager":
-          allEmployedManagers();
+          viewByManagers();
           break;
 
         case "View Total Utilized Budget By Department":
@@ -193,9 +193,9 @@ function addEmployee() {
 	role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
     department_id AS 'Dept ID#', department.dept_name AS 'Department',
     CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
-    FROM employee INNER JOIN role on role.id = employee.role_id 
-    INNER JOIN department on department.id = role.department_id 
-    LEFT JOIN employee e on employee.manager_id = e.id;`;
+    FROM role LEFT JOIN employee ON employee.role_id = role.id 
+    INNER JOIN department ON department.id = role.department_id 
+    LEFT JOIN employee e ON employee.manager_id = e.id;`;
   connection.query(query, function (err, res) {
     if (err) throw err;
     console.table(res);
@@ -295,13 +295,18 @@ function allEmployed() {
     LEFT JOIN employee e ON employee.manager_id = e.id;`;
   connection.query(query, function (err, res) {
     if (err) throw err;
+    console.log("\n");
+    console.log("VIEW OF ALL EMPLOYEES");
     console.table(res);
+    console.log("\n");
     startInquire();
   });
 }
 
 //NEEDS TO UPDATE CODE TO SEE ROLE.ID.
 function updateEmployee() {
+  console.log("\n");
+  console.log("");
   let query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
 	role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
     department_id AS 'Dept ID#', department.dept_name AS 'Department',
@@ -344,7 +349,7 @@ function updateEmployee() {
         {
           type: "input",
           name: "addNull",
-          message: "Please type NULL as written!",
+          message: "Please type 'null' as written!",
           when: (answer) => {
             return answer.toManager === "Yes";
           },
@@ -367,7 +372,27 @@ function updateEmployee() {
   }, 1000);
 }
 
-function updateManager() {}
+function updateManager() {
+  let query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
+	role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
+    department_id AS 'Dept ID#', department.dept_name AS 'Department',
+    CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
+    FROM role LEFT JOIN employee ON employee.role_id = role.id 
+    INNER JOIN department ON department.id = role.department_id 
+    LEFT JOIN employee e ON employee.manager_id = e.id;`;
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    console.table(res);
+  });
+
+  inquirer.prompt([
+    {
+      type: "number",
+      name: "roleID",
+      message: "What is the role ID number of the Title that the Manager will transfer to?",
+    },
+  ]);
+}
 
 function removeEmployee() {
   connection.query(`SELECT * FROM employee`, (err, res) => {
@@ -457,6 +482,24 @@ function removeDept() {
         }, 1000);
       });
   }, 1000);
+}
+
+function viewByManagers() {
+  const query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employee', 
+    role.title AS 'Title', CONCAT(manager.first_name, ' ', manager.last_name) AS Manager, dept_name AS Department
+    FROM employee
+    LEFT JOIN employee manager on manager.id = employee.manager_id
+    INNER JOIN role ON (role.id = employee.role_id && employee.manager_id != 'NULL')
+    INNER JOIN department ON (department.id = role.department_id)
+    ORDER BY manager;`;
+  connection.query(query, (err, res) => {
+    if (err) throw err;
+    console.log("\n");
+    console.log("VIEW EMPLOYEE BY MANAGER");
+    console.log("\n");
+    console.table(res);
+    startInquire();
+  });
 }
 
 // function employeeByDept() {
