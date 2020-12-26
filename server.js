@@ -306,9 +306,10 @@ function allEmployed() {
 //NEEDS TO UPDATE CODE TO SEE ROLE.ID.
 function updateEmployee() {
   console.log("\n");
-  console.log("");
+
+  console.log("\n");
   let query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
-	role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
+	  role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
     department_id AS 'Dept ID#', department.dept_name AS 'Department',
     CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
     FROM role LEFT JOIN employee ON employee.role_id = role.id 
@@ -485,21 +486,47 @@ function removeDept() {
 }
 
 function viewByManagers() {
-  const query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employee', 
-    role.title AS 'Title', CONCAT(manager.first_name, ' ', manager.last_name) AS Manager, dept_name AS Department
-    FROM employee
-    LEFT JOIN employee manager on manager.id = employee.manager_id
-    INNER JOIN role ON (role.id = employee.role_id && employee.manager_id != 'NULL')
-    INNER JOIN department ON (department.id = role.department_id)
-    ORDER BY manager;`;
-  connection.query(query, (err, res) => {
+  let query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
+	role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
+    department_id AS 'Dept ID#', department.dept_name AS 'Department',
+    CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
+    FROM employee INNER JOIN role ON role.id = employee.role_id 
+    INNER JOIN department ON department.id = role.department_id 
+    LEFT JOIN employee e ON employee.manager_id = e.id;`;
+  connection.query(query, function (err, res) {
     if (err) throw err;
     console.log("\n");
-    console.log("VIEW EMPLOYEE BY MANAGER");
-    console.log("\n");
+    console.log("VIEW OF ALL EMPLOYEES");
     console.table(res);
-    startInquire();
+    console.log("\n");
   });
+  setTimeout(() => {
+    inquirer
+      .prompt([
+        {
+          type: "number",
+          name: "managerId",
+          message: "Input the Manager's Id to view the employees under that Manager.",
+        },
+      ])
+      .then((answer) => {
+        const query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employee', 
+      role.title AS 'Title', CONCAT(manager.first_name, ' ', manager.last_name) AS Manager, dept_name AS Department
+      FROM employee
+      LEFT JOIN employee manager on manager.id = employee.manager_id
+      INNER JOIN role ON (role.id = employee.role_id && employee.manager_id != 'NULL')
+      INNER JOIN department ON (department.id = role.department_id)
+      WHERE employee.manager_id = ${answer.managerId};`;
+        connection.query(query, (err, res) => {
+          if (err) throw err;
+          console.log("\n");
+          console.log("VIEW EMPLOYEE BY MANAGER");
+          console.log("\n");
+          console.table(res);
+          startInquire();
+        });
+      });
+  }, 1000);
 }
 
 // function employeeByDept() {
