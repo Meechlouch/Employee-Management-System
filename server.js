@@ -1,6 +1,6 @@
 const inquirer = require("inquirer");
 const connection = require("./mysql-connection/connection");
-const cTable = require("console.table");
+//const cTable = require("console.table");
 const logo = require("asciiart-logo");
 const config = require("./package.json");
 
@@ -13,8 +13,8 @@ function init() {
       padding: 2,
       margin: 1,
       borderColor: "magenta",
-      logoColor: "green",
-      textColor: "yellow",
+      logoColor: "yellow",
+      textColor: "green",
       version: "1.0.0",
       description: '"mySQL Database and express server"',
     }).render()
@@ -42,7 +42,6 @@ function startInquire() {
         "Remove Department",
         "Update Employee Role",
         "Update Employee Manager",
-        "View All Employees By Department",
         "View All Employees By Manager",
         "View Total Utilized Budget By Department",
         "Exit",
@@ -110,40 +109,66 @@ function startInquire() {
 }
 
 function addDept() {
-  inquirer
-    .prompt([
-      {
-        name: "deptName",
-        type: "input",
-        message: "What is the name of the Department being added?",
-      },
-    ])
-    .then((answer) => {
-      connection.query(
-        "INSERT INTO department SET ?",
+  connection.query(`SELECT department.dept_name AS Departments FROM department;`, (err, res) => {
+    if (err) throw err;
+    console.log("----------------");
+    console.log("REFERENCE TABLE");
+    console.log("----------------");
+    console.table(res);
+    console.log("\n");
+  });
+
+  setTimeout(() => {
+    inquirer
+      .prompt([
         {
-          dept_name: answer.deptName,
+          name: "deptName",
+          type: "input",
+          message: "What is the name of the Department being added?",
         },
-        function (err) {
-          if (err) {
-            console.log(err);
-          } else {
-            connection.query(`SELECT * FROM department;`, (err, res) => {
-              if (err) throw err;
-              console.table(res);
-              startInquire();
-            });
+      ])
+      .then((answer) => {
+        connection.query(
+          "INSERT INTO department SET ?",
+          {
+            dept_name: answer.deptName,
+          },
+          function (err) {
+            if (err) {
+              console.log(err);
+            } else {
+              connection.query(`SELECT department.dept_name AS Department FROM department;`, (err, res) => {
+                if (err) throw err;
+                console.log("\n");
+                console.log("DATA ADDED TO TABLE");
+                console.log("-------------------");
+                console.table(res);
+                console.log("\n");
+                startInquire();
+              });
+            }
           }
-        }
-      );
-    });
+        );
+      });
+  }, 1000);
 }
 
 function addRole() {
-  connection.query(`SELECT * FROM department;`, (err, res) => {
-    if (err) throw err;
-    console.table(res);
-  }),
+  connection.query(
+    `SELECT  title AS Title, salary AS Salary, dept_name AS Department, department.id AS 'Dept ID#' 
+                    FROM role
+                    INNER JOIN department
+                    ON department.id = department_id
+                    ORDER BY dept_name;`,
+    (err, res) => {
+      if (err) throw err;
+      console.log("----------------");
+      console.log("REFERENCE TABLE");
+      console.log("----------------");
+      console.table(res);
+      console.log("\n");
+    }
+  ),
     setTimeout(() => {
       inquirer
         .prompt([
@@ -177,11 +202,21 @@ function addRole() {
                 console.log("You must create a New Department before you create a New Role!");
                 startInquire();
               }
-              connection.query(`SELECT * FROM role;`, (err, res) => {
-                if (err) throw err;
-                console.table(res);
-                startInquire();
-              });
+              connection.query(
+                `SELECT  title AS Title, salary AS Salary, dept_name AS Department 
+                                FROM role
+                                INNER JOIN department
+                                ON department.id = department_id;`,
+                (err, res) => {
+                  if (err) throw err;
+                  console.log("----------------");
+                  console.log("DATA ADDED TO TABLE");
+                  console.log("----------------");
+                  console.table(res);
+                  console.log("\n");
+                  startInquire();
+                }
+              );
             }
           );
         });
@@ -383,7 +418,10 @@ function updateManager() {
     LEFT JOIN employee e ON employee.manager_id = e.id;`;
   connection.query(query, function (err, res) {
     if (err) throw err;
+    console.log("USE THIS TABLE AS A REFERENCE");
+    console.log("\n");
     console.table(res);
+    console.log("\n");
   });
 
   inquirer.prompt([
@@ -496,7 +534,7 @@ function viewByManagers() {
   connection.query(query, function (err, res) {
     if (err) throw err;
     console.log("\n");
-    console.log("VIEW OF ALL EMPLOYEES");
+    console.log("USE TABLE AS A REFERENCE");
     console.table(res);
     console.log("\n");
   });
@@ -523,21 +561,13 @@ function viewByManagers() {
           console.log("VIEW EMPLOYEE BY MANAGER");
           console.log("\n");
           console.table(res);
+          console.log("\n");
           startInquire();
         });
       });
   }, 1000);
 }
 
-// function employeeByDept() {
-//   let byDept = `SELECT  department.id, dept_name, first_name, last_name
-// 	FROM department
-//     LEFT JOIN employee
-//     ON role_id = department.id;`;
-//   connection.query(byDept, (err, res) => {
-//     if (err) throw err;
-//     console.table(res);
-//     startInquire();
-//   });
-// }
+function budgetByDept() {}
+
 init();
