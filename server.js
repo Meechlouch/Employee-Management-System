@@ -1,6 +1,6 @@
 const inquirer = require("inquirer");
 const connection = require("./mysql-connection/connection");
-//const cTable = require("console.table");
+const cTable = require("console.table");
 const logo = require("asciiart-logo");
 const config = require("./package.json");
 
@@ -568,6 +568,50 @@ function viewByManagers() {
   }, 1000);
 }
 
-function budgetByDept() {}
+function budgetByDept() {
+  connection.query(
+    `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
+	                  role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
+                    department_id AS 'Dept ID#', department.dept_name AS 'Department',
+                    CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
+                    FROM employee INNER JOIN role ON role.id = employee.role_id 
+                    INNER JOIN department ON department.id = role.department_id 
+                    LEFT JOIN employee e ON employee.manager_id = e.id;`,
+    (err, res) => {
+      if (err) throw err;
+      console.log("----------------");
+      console.log("REFERENCE TABLE");
+      console.log("----------------");
+      console.table(res);
+      console.log("\n");
+    }
+  ),
+    setTimeout(() => {
+      inquirer
+        .prompt([
+          {
+            type: "input",
+            name: "deptName",
+            message: "(Caps Sensitive) Type in the Department to see its Total Budget.",
+          },
+        ])
+        .then((answer) => {
+          const query = `SELECT SUM(salary), dept_name AS Department
+        FROM role
+        INNER JOIN department
+        ON department_id =department.id
+        WHERE department.dept_name = '${answer.deptName}';`;
+          connection.query(query, (err, res) => {
+            if (err) throw err;
+            console.log("---------------------------------------------");
+            console.log(`Total Budget of ${answer.deptName} department`);
+            console.log("---------------------------------------------");
+            console.table(res);
+            console.log("\n");
+            startInquire();
+          });
+        });
+    }, 1000);
+}
 
 init();
