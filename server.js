@@ -325,7 +325,7 @@ function allEmployed() {
 	role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
     department_id AS 'Dept ID#', department.dept_name AS 'Department',
     CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
-    FROM employee INNER JOIN role ON role.id = employee.role_id 
+    FROM role LEFT JOIN employee ON employee.role_id = role.id 
     INNER JOIN department ON department.id = role.department_id 
     LEFT JOIN employee e ON employee.manager_id = e.id;`;
   connection.query(query, function (err, res) {
@@ -422,15 +422,63 @@ function updateManager() {
     console.log("\n");
     console.table(res);
     console.log("\n");
+    connection.query(
+      `SELECT employee.id AS 'ID#', CONCAT(first_name, " ", last_name) AS Managers, title AS Title, role.id AS 'Title ID#', salary AS Salary
+                      FROM employee
+                      INNER JOIN role
+                      ON role.id = role_id
+                      WHERE title like '%Manager%';`,
+      function (err, res) {
+        if (err) throw err;
+        console.log("--------------------");
+        console.log("VIEW OF ALL MANAGERS");
+        console.log("--------------------");
+        console.table(res);
+        console.log("\n");
+      }
+    );
   });
-
-  inquirer.prompt([
-    {
-      type: "number",
-      name: "roleID",
-      message: "What is the role ID number of the Title that the Manager will transfer to?",
-    },
-  ]);
+  setTimeout(() => {
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          name: "name",
+          message: "Enter the name of the Manager that you would like to update?",
+        },
+        {
+          type: "number",
+          name: "roleID",
+          message: "What is the role ID number of the Title that the Manager will transfer to?",
+        },
+      ])
+      .then((answer) => {
+        console.log(answer.name);
+        const query = `UPDATE employee
+      SET role_id = ${answer.roleID}
+      WHERE concat(employee.first_name, " ", employee.last_name) = '${answer.name}';`;
+        connection.query(query, (err) => {
+          if (err) {
+            throw err;
+          } else {
+            connection.query(
+              `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
+              role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
+              department_id AS 'Dept ID#', department.dept_name AS 'Department',
+              CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
+              FROM role LEFT JOIN employee ON employee.role_id = role.id 
+              INNER JOIN department ON department.id = role.department_id 
+              LEFT JOIN employee e ON employee.manager_id = e.id;`,
+              (err, res) => {
+                if (err) throw err;
+                console.table(res);
+                startInquire();
+              }
+            );
+          }
+        });
+      });
+  }, 1500);
 }
 
 function removeEmployee() {
