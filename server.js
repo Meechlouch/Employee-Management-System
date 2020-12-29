@@ -111,11 +111,10 @@ function startInquire() {
 function addDept() {
   connection.query(`SELECT department.dept_name AS Departments FROM department;`, (err, res) => {
     if (err) throw err;
-    console.log("----------------");
-    console.log("REFERENCE TABLE");
-    console.log("----------------");
+    console.log("----------------------");
+    console.log("** REFERENCE TABLE! **");
+    console.log("----------------------");
     console.table(res);
-    console.log("\n");
   });
 
   setTimeout(() => {
@@ -139,11 +138,10 @@ function addDept() {
             } else {
               connection.query(`SELECT department.dept_name AS Department FROM department;`, (err, res) => {
                 if (err) throw err;
-                console.log("\n");
-                console.log("DATA ADDED TO TABLE");
-                console.log("-------------------");
+                console.log("--------------------");
+                console.log("** DEPT WAS ADDED **");
+                console.log("--------------------");
                 console.table(res);
-                console.log("\n");
                 startInquire();
               });
             }
@@ -162,11 +160,10 @@ function addRole() {
                     ORDER BY dept_name;`,
     (err, res) => {
       if (err) throw err;
-      console.log("----------------");
-      console.log("REFERENCE TABLE");
-      console.log("----------------");
+      console.log("--------------------------------------------------------------");
+      console.log("      ********** USE THIS TABLE AS A REFERENCE **********      ");
+      console.log("--------------------------------------------------------------");
       console.table(res);
-      console.log("\n");
     }
   ),
     setTimeout(() => {
@@ -209,9 +206,9 @@ function addRole() {
                                 ON department.id = department_id;`,
                 (err, res) => {
                   if (err) throw err;
-                  console.log("----------------");
-                  console.log("DATA ADDED TO TABLE");
-                  console.log("----------------");
+                  console.log("--------------------------------------------------------------");
+                  console.log("      ********** DATA WAS ADDED TO THE TABLE! **********      ");
+                  console.log("--------------------------------------------------------------");
                   console.table(res);
                   console.log("\n");
                   startInquire();
@@ -224,7 +221,7 @@ function addRole() {
 }
 
 function addEmployee() {
-  let query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
+  const query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
 	role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
     department_id AS 'Dept ID#', department.dept_name AS 'Department',
     CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
@@ -233,6 +230,15 @@ function addEmployee() {
     LEFT JOIN employee e ON employee.manager_id = e.id;`;
   connection.query(query, function (err, res) {
     if (err) throw err;
+    console.log(
+      "----------------------------------------------------------------------------------------------------------------"
+    );
+    console.log(
+      "************************************     USE THIS TABLE AS A REFERENCE!     ************************************"
+    );
+    console.log(
+      "----------------------------------------------------------------------------------------------------------------"
+    );
     console.table(res);
   });
   setTimeout(() => {
@@ -282,12 +288,21 @@ function addEmployee() {
             if (err) {
               console.log("You must create a New Department before you create a New Role!");
               startInquire();
+            } else {
+              connection.query(
+                `SELECT employee.id AS 'ID#', CONCAT(first_name, " ", last_name) AS Employee, role_id AS 'Role ID#',
+              manager_id AS Manager
+              FROM employee;`,
+                (err, res) => {
+                  if (err) throw err;
+                  console.log("---------------------------------------");
+                  console.log("***** DATA WAS ADDED TO THE TABLE *****");
+                  console.log("---------------------------------------");
+                  console.table(res);
+                  startInquire();
+                }
+              );
             }
-            connection.query(`SELECT * FROM employee;`, (err, res) => {
-              if (err) throw err;
-              console.table(res);
-              startInquire();
-            });
           }
         );
       });
@@ -295,18 +310,29 @@ function addEmployee() {
 }
 
 function allDept() {
-  var query = "SELECT * FROM department";
+  var query = `SELECT department.id AS 'ID#', dept_name AS Departments
+              FROM department;`;
   connection.query(query, function (err, res) {
     if (err) throw err;
+    console.log("---------------------------");
+    console.log("* VIEW OF ALL DEPARTMENTS *");
+    console.log("---------------------------");
     console.table(res);
     startInquire();
   });
 }
 
 function allRoles() {
-  var query = "SELECT * FROM role";
+  var query = `SELECT  title AS Title, salary AS Salary, dept_name AS Department, department.id AS 'Dept ID#' 
+  FROM role
+  INNER JOIN department
+  ON department.id = department_id
+  ORDER BY dept_name;`;
   connection.query(query, function (err, res) {
     if (err) throw err;
+    console.log("--------------------------------------------------------------");
+    console.log("          ********** A VIEW OF ALL ROLES! **********          ");
+    console.log("--------------------------------------------------------------");
     console.table(res);
     startInquire();
   });
@@ -330,19 +356,22 @@ function allEmployed() {
     LEFT JOIN employee e ON employee.manager_id = e.id;`;
   connection.query(query, function (err, res) {
     if (err) throw err;
-    console.log("\n");
-    console.log("VIEW OF ALL EMPLOYEES");
+    console.log(
+      "----------------------------------------------------------------------------------------------------------------"
+    );
+    console.log(
+      "                  ******************     USE THIS TABLE AS A REFERENCE!     ******************                  "
+    );
+    console.log(
+      "----------------------------------------------------------------------------------------------------------------"
+    );
     console.table(res);
-    console.log("\n");
     startInquire();
   });
 }
 
 //NEEDS TO UPDATE CODE TO SEE ROLE.ID.
 function updateEmployee() {
-  console.log("\n");
-
-  console.log("\n");
   let query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
 	  role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
     department_id AS 'Dept ID#', department.dept_name AS 'Department',
@@ -352,6 +381,9 @@ function updateEmployee() {
     LEFT JOIN employee e ON employee.manager_id = e.id;`;
   connection.query(query, function (err, res) {
     if (err) throw err;
+    console.log("----------------------------------");
+    console.log("USE THE TABLE AS A REFERENCE");
+    console.log("----------------------------------");
     console.table(res);
   });
 
@@ -410,16 +442,17 @@ function updateEmployee() {
 
 function updateManager() {
   let query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
-	role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
-    department_id AS 'Dept ID#', department.dept_name AS 'Department',
-    CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
-    FROM role LEFT JOIN employee ON employee.role_id = role.id 
-    INNER JOIN department ON department.id = role.department_id 
-    LEFT JOIN employee e ON employee.manager_id = e.id;`;
+	            role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
+              department_id AS 'Dept ID#', department.dept_name AS 'Department',
+              CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
+              FROM role LEFT JOIN employee ON employee.role_id = role.id 
+              INNER JOIN department ON department.id = role.department_id 
+              LEFT JOIN employee e ON employee.manager_id = e.id;`;
   connection.query(query, function (err, res) {
     if (err) throw err;
+    console.log("-----------------------------");
     console.log("USE THIS TABLE AS A REFERENCE");
-    console.log("\n");
+    console.log("-----------------------------");
     console.table(res);
     console.log("\n");
     connection.query(
@@ -581,8 +614,9 @@ function viewByManagers() {
     LEFT JOIN employee e ON employee.manager_id = e.id;`;
   connection.query(query, function (err, res) {
     if (err) throw err;
-    console.log("\n");
+    console.log("------------------------");
     console.log("USE TABLE AS A REFERENCE");
+    console.log("------------------------");
     console.table(res);
     console.log("\n");
   });
@@ -627,9 +661,9 @@ function budgetByDept() {
                     LEFT JOIN employee e ON employee.manager_id = e.id;`,
     (err, res) => {
       if (err) throw err;
-      console.log("----------------");
+      console.log("--------------------");
       console.log("REFERENCE TABLE");
-      console.log("----------------");
+      console.log("--------------------");
       console.table(res);
       console.log("\n");
     }
