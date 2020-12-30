@@ -32,6 +32,20 @@ VALUES ('Project Manager', 87000, 1),
      
 INSERT INTO employee(first_name, last_name, role_id)
 VALUES('Okina', 'Shyachyou', 12),
-	  ('Mister', 'Mxyzptlk', 13);
+      ('Mister', 'Mxyzptlk', 13),
+      ('Amy', 'Sohourney', 1),
+      ('Amanda', 'Hugginkiss', 5),
+      ('Hong', 'Solo', 16),
+      ('Phillip', 'Onya', 20);
 
+INSERT INTO employee(first_name, last_name, role_id, manager_id)
+VALUES('Omar', 'Epps', 2, 3),
+      ('Al', 'Ki', 6, 4),
+	  ('John', 'Crow', 10, 1),
+      ('Jenny', 'Doe', 15, 2),
+      ('Jon', 'Doe', 17, 5),
+      ('Corey', 'Scotts', 22, 6),
+      ('Lance', 'Armstrong', 9, 5);
+      
+      
        
