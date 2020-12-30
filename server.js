@@ -40,8 +40,8 @@ function startInquire() {
         "Remove Employee",
         "Remove Role",
         "Remove Department",
-        "Update Employee Role",
-        "Update Employee Manager",
+        "Update Employee's Role",
+        "Update Employee's Manager",
         "View All Employees By Manager",
         "View Total Utilized Budget By Department",
         "Exit",
@@ -85,11 +85,11 @@ function startInquire() {
           removeDept();
           break;
 
-        case "Update Employee Role":
+        case "Update Employee's Role":
           updateEmployee();
           break;
 
-        case "Update Employee Manager":
+        case "Update Employee's Manager":
           updateManager();
           break;
 
@@ -338,14 +338,6 @@ function allRoles() {
   });
 }
 
-/*`SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
-	role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
-    department_id AS 'Dept ID#', department.dept_name AS 'Department',
-    CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
-    FROM employee INNER JOIN role ON role.id = employee.role_id 
-    INNER JOIN department ON department.id = role.department_id 
-    LEFT JOIN employee e ON employee.manager_id = e.id;`;*/
-
 function allEmployed() {
   let query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
 	role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
@@ -353,7 +345,8 @@ function allEmployed() {
     CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
     FROM role LEFT JOIN employee ON employee.role_id = role.id 
     INNER JOIN department ON department.id = role.department_id 
-    LEFT JOIN employee e ON employee.manager_id = e.id;`;
+    LEFT JOIN employee e ON employee.manager_id = e.id
+    WHERE employee.id IS NOT NULL;`;
   connection.query(query, function (err, res) {
     if (err) throw err;
     console.log(
@@ -370,7 +363,6 @@ function allEmployed() {
   });
 }
 
-//NEEDS TO UPDATE CODE TO SEE ROLE.ID.
 function updateEmployee() {
   let query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
 	  role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
@@ -381,9 +373,15 @@ function updateEmployee() {
     LEFT JOIN employee e ON employee.manager_id = e.id;`;
   connection.query(query, function (err, res) {
     if (err) throw err;
-    console.log("----------------------------------");
-    console.log("USE THE TABLE AS A REFERENCE");
-    console.log("----------------------------------");
+    console.log(
+      "----------------------------------------------------------------------------------------------------------------"
+    );
+    console.log(
+      "                  ******************     USE THIS TABLE AS A REFERENCE!     ******************                  "
+    );
+    console.log(
+      "----------------------------------------------------------------------------------------------------------------"
+    );
     console.table(res);
   });
 
@@ -429,9 +427,28 @@ function updateEmployee() {
                      WHERE id = ${answer.id};`;
         connection.query(query, (err) => {
           if (err) throw err;
-          connection.query(`SELECT * FROM employee;`, (err, res) => {
-            console.table(res);
-          });
+          connection.query(
+            `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
+              role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', department.dept_name AS 'Department',
+              CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
+              FROM employee 
+              LEFT JOIN role ON role.id = employee.role_id 
+              INNER JOIN department ON department.id = role.department_id
+              LEFT JOIN employee e ON employee.manager_id = e.id;`,
+            (err, res) => {
+              if (err) throw err;
+              console.log(
+                "-----------------------------------------------------------------------------------------------------"
+              );
+              console.log(
+                "    ******************     THE FOLLOWING EMPLOYEE'S ROLE HAS BEEN CHANGED!     ******************    "
+              );
+              console.log(
+                "-----------------------------------------------------------------------------------------------------"
+              );
+              console.table(res);
+            }
+          );
         });
         setTimeout(() => {
           startInquire();
@@ -445,29 +462,34 @@ function updateManager() {
 	            role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
               department_id AS 'Dept ID#', department.dept_name AS 'Department',
               CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
-              FROM role LEFT JOIN employee ON employee.role_id = role.id 
+              FROM role 
+              LEFT JOIN employee ON employee.role_id = role.id 
               INNER JOIN department ON department.id = role.department_id 
               LEFT JOIN employee e ON employee.manager_id = e.id;`;
   connection.query(query, function (err, res) {
     if (err) throw err;
-    console.log("-----------------------------");
-    console.log("USE THIS TABLE AS A REFERENCE");
-    console.log("-----------------------------");
+    console.log(
+      "------------------------------------------------------------------------------------------------------------------"
+    );
+    console.log(
+      "                  *******************     USE THIS TABLE AS A REFERENCE!     *******************                  "
+    );
+    console.log(
+      "------------------------------------------------------------------------------------------------------------------"
+    );
     console.table(res);
-    console.log("\n");
     connection.query(
       `SELECT employee.id AS 'ID#', CONCAT(first_name, " ", last_name) AS Managers, title AS Title, role.id AS 'Title ID#', salary AS Salary
                       FROM employee
                       INNER JOIN role
                       ON role.id = role_id
-                      WHERE title like '%Manager%';`,
+                      WHERE manager_id IS null;`,
       function (err, res) {
         if (err) throw err;
-        console.log("--------------------");
-        console.log("VIEW OF ALL MANAGERS");
-        console.log("--------------------");
+        console.log("----------------------------------------------------------");
+        console.log("        ********** VIEW OF ALL MANAGERS **********        ");
+        console.log("----------------------------------------------------------");
         console.table(res);
-        console.log("\n");
       }
     );
   });
@@ -475,50 +497,82 @@ function updateManager() {
     inquirer
       .prompt([
         {
+          type: "confirm",
+          name: "altManager",
+          message: "Would you like to update the Manager?",
+        },
+        {
           type: "input",
           name: "name",
           message: "Enter the name of the Manager that you would like to update?",
+          when: (answer) => {
+            return answer.altManager === true;
+          },
         },
         {
           type: "number",
           name: "roleID",
           message: "What is the role ID number of the Title that the Manager will transfer to?",
+          when: (answer) => {
+            return answer.altManager === true;
+          },
         },
       ])
       .then((answer) => {
-        console.log(answer.name);
-        const query = `UPDATE employee
-      SET role_id = ${answer.roleID}
-      WHERE concat(employee.first_name, " ", employee.last_name) = '${answer.name}';`;
-        connection.query(query, (err) => {
-          if (err) {
-            throw err;
-          } else {
-            connection.query(
-              `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
-              role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
-              department_id AS 'Dept ID#', department.dept_name AS 'Department',
-              CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
-              FROM role LEFT JOIN employee ON employee.role_id = role.id 
-              INNER JOIN department ON department.id = role.department_id 
-              LEFT JOIN employee e ON employee.manager_id = e.id;`,
-              (err, res) => {
-                if (err) throw err;
-                console.table(res);
-                startInquire();
-              }
-            );
-          }
-        });
+        console.log(answer);
+        if (answer.altManager === false) {
+          startInquire();
+        } else {
+          const query = `UPDATE employee
+            SET role_id = ${answer.roleID}
+            WHERE concat(employee.first_name, " ", employee.last_name) = '${answer.name}';`;
+          connection.query(query, (err) => {
+            if (err) {
+              throw err;
+            } else {
+              connection.query(
+                `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
+                role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
+                department_id AS 'Dept ID#', department.dept_name AS 'Department',
+                CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
+                FROM role LEFT JOIN employee ON employee.role_id = role.id 
+                INNER JOIN department ON department.id = role.department_id 
+                LEFT JOIN employee e ON employee.manager_id = e.id;`,
+                (err, res) => {
+                  if (err) throw err;
+                  console.log(
+                    "----------------------------------------------------------------------------------------------------------------"
+                  );
+                  console.log(
+                    "                  ******************     USE THIS TABLE AS A REFERENCE!     ******************                  "
+                  );
+                  console.log(
+                    "----------------------------------------------------------------------------------------------------------------"
+                  );
+                  console.table(res);
+                  matchEmpToNewManager();
+                }
+              );
+            }
+          });
+        }
       });
   }, 1500);
 }
 
 function removeEmployee() {
-  connection.query(`SELECT * FROM employee`, (err, res) => {
-    if (err) throw err;
-    console.table(res);
-  });
+  connection.query(
+    `SELECT employee.id AS 'ID#', CONCAT(first_name, " ", last_name) AS Employees,
+                   role_id AS 'Role ID#', manager_id AS 'Manager ID#'
+                   FROM employee`,
+    (err, res) => {
+      if (err) throw err;
+      console.log("-------------------------------------------");
+      console.log(" ***** USE THIS TABLE AS A REFERENCE ***** ");
+      console.log("-------------------------------------------");
+      console.table(res);
+    }
+  );
   setTimeout(() => {
     inquirer
       .prompt([
@@ -532,10 +586,18 @@ function removeEmployee() {
         let query = `DELETE FROM employee WHERE employee.id = ${answer.empID};`;
         connection.query(query, (err) => {
           if (err) throw err;
-          connection.query(`SELECT * FROM employee;`, (err, res) => {
-            if (err) throw err;
-            console.table(res);
-          });
+          connection.query(
+            `SELECT employee.id AS 'ID#', CONCAT(first_name, " ", last_name) AS Employees,
+                           role_id AS 'Role ID#', manager_id AS 'Manager ID#'
+                           FROM employee`,
+            (err, res) => {
+              if (err) throw err;
+              console.log("-------------------------------------------");
+              console.log(" ****** EMPLOYEE HAS BEEN DELETED!  ****** ");
+              console.log("-------------------------------------------");
+              console.table(res);
+            }
+          );
         });
         setTimeout(() => {
           startInquire();
@@ -545,40 +607,67 @@ function removeEmployee() {
 }
 
 function removeRole() {
-  connection.query(`SELECT * FROM role;`, (err, res) => {
-    if (err) throw err;
-    console.table(res);
-  });
-  setTimeout(() => {
-    inquirer
-      .prompt([
-        {
-          type: "number",
-          name: "roleID",
-          message: "What is the id number of the role you would like to delete?",
-        },
-      ])
-      .then((answer) => {
-        let query = `DELETE FROM role WHERE role.id = ${answer.roleID};`;
-        connection.query(query, (err) => {
-          if (err) throw err;
-          connection.query(`SELECT * FROM role;`, (err, res) => {
+  connection.query(
+    `SELECT role.id AS 'ID#', title AS Title, salary AS Salary, dept_name AS Department, department.id AS 'Dept ID#' 
+                    FROM role
+                    INNER JOIN department
+                    ON department.id = department_id
+                    ORDER BY dept_name;`,
+    (err, res) => {
+      if (err) throw err;
+      console.log("-------------------------------------------------------------------");
+      console.log("      ************ USE THIS TABLE AS A REFERENCE ************      ");
+      console.log("-------------------------------------------------------------------");
+      console.table(res);
+    }
+  ),
+    setTimeout(() => {
+      inquirer
+        .prompt([
+          {
+            type: "number",
+            name: "roleID",
+            message: "What is the id number of the role you would like to delete?",
+          },
+        ])
+        .then((answer) => {
+          let query = `DELETE FROM role WHERE role.id = ${answer.roleID};`;
+          connection.query(query, (err) => {
             if (err) throw err;
-            console.table(res);
+            connection.query(
+              `SELECT  role.id AS 'ID#', title AS Title, salary AS Salary, dept_name AS Department, department.id AS 'Dept ID#' 
+                FROM role
+                INNER JOIN department
+                ON department.id = department_id
+                ORDER BY dept_name;`,
+              (err, res) => {
+                if (err) throw err;
+                console.log("-------------------------------------------------------------------");
+                console.log("      ************ ROLE WAS DELETED SUCCESSFULLY ************      ");
+                console.log("-------------------------------------------------------------------");
+                console.table(res);
+              }
+            );
           });
+          setTimeout(() => {
+            startInquire();
+          }, 1000);
         });
-        setTimeout(() => {
-          startInquire();
-        }, 1000);
-      });
-  }, 1000);
+    }, 1000);
 }
 
 function removeDept() {
-  connection.query(`SELECT * FROM department;`, (err, res) => {
-    if (err) throw err;
-    console.table(res);
-  });
+  connection.query(
+    `SELECT department.id AS 'ID#', department.dept_name AS Departments
+      FROM department;`,
+    (err, res) => {
+      if (err) throw err;
+      console.log("-------------------------");
+      console.log(" *** REFERENCE TABLE *** ");
+      console.log("-------------------------");
+      console.table(res);
+    }
+  );
   setTimeout(() => {
     inquirer
       .prompt([
@@ -592,10 +681,17 @@ function removeDept() {
         let query = `DELETE FROM department WHERE department.id = ${answer.deptID};`;
         connection.query(query, (err) => {
           if (err) throw err;
-          connection.query(`SELECT * FROM department;`, (err, res) => {
-            if (err) throw err;
-            console.table(res);
-          });
+          connection.query(
+            `SELECT department.id AS 'ID#', department.dept_name AS Departments
+              FROM department;`,
+            (err, res) => {
+              if (err) throw err;
+              console.log("-------------------------");
+              console.log(" *** DEPT WAS ADDED! *** ");
+              console.log("-------------------------");
+              console.table(res);
+            }
+          );
         });
         setTimeout(() => {
           startInquire();
@@ -694,6 +790,83 @@ function budgetByDept() {
           });
         });
     }, 1000);
+}
+
+function matchEmpToNewManager() {
+  inquirer
+    .prompt([
+      {
+        type: "confirm",
+        name: "empUpdate",
+        message: "Are there employees under the new manager that needs their manager id updated?",
+      },
+      {
+        type: "number",
+        name: "managerID",
+        message: "What is the ID number of the new Manager?",
+        when: (answer) => {
+          return answer.empUpdate === true;
+        },
+      },
+      {
+        type: "number",
+        name: "empID",
+        message: "What is the employee id number of employee that needs Manager update?",
+        when: (answer) => {
+          return answer.empUpdate === true;
+        },
+      },
+      {
+        type: "confirm",
+        name: "moreEmps",
+        message: "Are there any more employees that needs their Manager ID# updated?",
+        when: (answer) => {
+          return answer.empUpdate === true;
+        },
+      },
+    ])
+    .then((answer) => {
+      console.log(answer);
+      if (answer.empUpdate === false) {
+        startInquire();
+      } else {
+        const query = `UPDATE employee
+                  SET manager_id = ${answer.managerID}
+                  WHERE employee.id IN (${answer.empID})`;
+        connection.query(query, (err) => {
+          if (err) {
+            throw (err, startInquire());
+          } else {
+            connection.query(
+              `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
+                      role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary',
+                      department_id AS 'Dept ID#', department.dept_name AS 'Department',
+                      CONCAT(e.first_name, ' ', e.last_name) AS 'Manager'
+                      FROM role LEFT JOIN employee ON employee.role_id = role.id
+                      INNER JOIN department ON department.id = role.department_id
+                      LEFT JOIN employee e ON employee.manager_id = e.id;`,
+              (err, res) => {
+                if (err) throw err;
+                console.log(
+                  "----------------------------------------------------------------------------------------------------------------"
+                );
+                console.log(
+                  "                  ******************     USE THIS TABLE AS A REFERENCE!     ******************                  "
+                );
+                console.log(
+                  "----------------------------------------------------------------------------------------------------------------"
+                );
+                console.table(res);
+                if (answer.moreEmps === true) {
+                  matchEmpToNewManager();
+                }
+                startInquire();
+              }
+            );
+          }
+        });
+      }
+    });
 }
 
 init();
