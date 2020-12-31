@@ -109,7 +109,7 @@ function startInquire() {
 }
 
 function addDept() {
-  connection.query(`SELECT department.dept_name AS Departments FROM department;`, (err, res) => {
+  connection.query(`SELECT department.id, department.dept_name AS Departments FROM department;`, (err, res) => {
     if (err) throw err;
     console.log("----------------------");
     console.log("** REFERENCE TABLE! **");
@@ -136,14 +136,17 @@ function addDept() {
             if (err) {
               console.log(err);
             } else {
-              connection.query(`SELECT department.dept_name AS Department FROM department;`, (err, res) => {
-                if (err) throw err;
-                console.log("--------------------");
-                console.log("** DEPT WAS ADDED **");
-                console.log("--------------------");
-                console.table(res);
-                startInquire();
-              });
+              connection.query(
+                `SELECT department.id, department.dept_name AS Department FROM department;`,
+                (err, res) => {
+                  if (err) throw err;
+                  console.log("--------------------");
+                  console.log("** DEPT WAS ADDED **");
+                  console.log("--------------------");
+                  console.table(res);
+                  startInquire();
+                }
+              );
             }
           }
         );
