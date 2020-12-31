@@ -498,28 +498,46 @@ function updateManager() {
       inquirer
         .prompt([
           {
+            type: "confirm",
+            name: "managerRole",
+            message: "Will you be updating the Manager's role?",
+          },
+          {
             type: "input",
             name: "name",
             message: "Enter the name of the Manager that you would like to update?",
+            when: (answer) => {
+              return answer.managerRole === true;
+            },
           },
           {
             type: "number",
             name: "roleID",
             message: "What is the role ID number of the Title that the Manager will transfer to?",
+            when: (answer) => {
+              return answer.managerRole === true;
+            },
           },
           {
             type: "confirm",
             name: "updateManager",
             message: "Do you need to update another Manager to fill the position of the last Manager?",
+            when: (answer) => {
+              return answer.managerRole === true;
+            },
           },
         ])
         .then((answer) => {
-          let query = `UPDATE employee
-            SET role_id = ${answer.roleID}
-            WHERE concat(employee.first_name, " ", employee.last_name) = '${answer.name}';`;
-          connection.query(query, (err) => {
-            if (err) throw err;
-          });
+          if (answer.managerRole === false) {
+            matchEmpToNewManager();
+          } else {
+            let query = `UPDATE employee
+              SET role_id = ${answer.roleID}
+              WHERE concat(employee.first_name, " ", employee.last_name) = '${answer.name}';`;
+            connection.query(query, (err) => {
+              if (err) throw err;
+            });
+          }
           if (answer.updateManager) {
             updateManager();
           } else {
@@ -534,13 +552,13 @@ function updateManager() {
               (err, res) => {
                 if (err) throw err;
                 console.log(
-                  "----------------------------------------------------------------------------------------------------------------"
+                  "-----------------------------------------------------------------------------------------------------------------"
                 );
                 console.log(
-                  "                  ******************     USE THIS TABLE AS A REFERENCE!     ******************                  "
+                  "                  ******************     MANAGERS ROLE HAS BEEN UPDATED!     ******************                  "
                 );
                 console.log(
-                  "----------------------------------------------------------------------------------------------------------------"
+                  "-----------------------------------------------------------------------------------------------------------------"
                 );
                 console.table(res);
                 matchEmpToNewManager();
@@ -678,9 +696,9 @@ function removeDept() {
               FROM department;`,
             (err, res) => {
               if (err) throw err;
-              console.log("-------------------------");
-              console.log(" *** DEPT WAS ADDED! *** ");
-              console.log("-------------------------");
+              console.log("--------------------------");
+              console.log(" *** DEPT WAS DELETED *** ");
+              console.log("--------------------------");
               console.table(res);
             }
           );
