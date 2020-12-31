@@ -16,7 +16,7 @@ function init() {
       logoColor: "yellow",
       textColor: "green",
       version: "1.0.0",
-      description: '"mySQL Database and express server"',
+      description: '"mySQL Database and nodeJs"',
     }).render()
   );
   setTimeout(() => {
@@ -521,7 +521,7 @@ function updateManager() {
       .then((answer) => {
         console.log(answer);
         if (answer.altManager === false) {
-          startInquire();
+          matchEmpToNewManager();
         } else {
           const query = `UPDATE employee
             SET role_id = ${answer.roleID}
@@ -567,9 +567,9 @@ function removeEmployee() {
                    FROM employee`,
     (err, res) => {
       if (err) throw err;
-      console.log("-------------------------------------------");
-      console.log(" ***** USE THIS TABLE AS A REFERENCE ***** ");
-      console.log("-------------------------------------------");
+      console.log("---------------------------------------------");
+      console.log(" ****** USE THIS TABLE AS A REFERENCE ****** ");
+      console.log("---------------------------------------------");
       console.table(res);
     }
   );
@@ -579,7 +579,8 @@ function removeEmployee() {
         {
           type: "number",
           name: "empID",
-          message: "What is the ID Number of the employee that you would like to remove? ",
+          message:
+            "What is the ID Number of the employee that you would like to remove? (Deleting a Manager will delete employees under that Manager)",
         },
       ])
       .then((answer) => {
@@ -592,9 +593,9 @@ function removeEmployee() {
                            FROM employee`,
             (err, res) => {
               if (err) throw err;
-              console.log("-------------------------------------------");
-              console.log(" ****** EMPLOYEE HAS BEEN DELETED!  ****** ");
-              console.log("-------------------------------------------");
+              console.log("---------------------------------------------");
+              console.log(" ******* EMPLOYEE HAS BEEN DELETED!  ******* ");
+              console.log("---------------------------------------------");
               console.table(res);
             }
           );
@@ -701,21 +702,20 @@ function removeDept() {
 }
 
 function viewByManagers() {
-  let query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
-	role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
-    department_id AS 'Dept ID#', department.dept_name AS 'Department',
-    CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
-    FROM employee INNER JOIN role ON role.id = employee.role_id 
-    INNER JOIN department ON department.id = role.department_id 
-    LEFT JOIN employee e ON employee.manager_id = e.id;`;
-  connection.query(query, function (err, res) {
-    if (err) throw err;
-    console.log("------------------------");
-    console.log("USE TABLE AS A REFERENCE");
-    console.log("------------------------");
-    console.table(res);
-    console.log("\n");
-  });
+  connection.query(
+    `SELECT employee.id AS 'ID#', CONCAT(first_name, " ", last_name) AS Managers, title AS Title, role.id AS 'Title ID#', salary AS Salary
+                    FROM employee
+                    INNER JOIN role
+                    ON role.id = role_id
+                    WHERE manager_id IS null;`,
+    function (err, res) {
+      if (err) throw err;
+      console.log("----------------------------------------------------------");
+      console.log("        ********** VIEW OF ALL MANAGERS **********        ");
+      console.log("----------------------------------------------------------");
+      console.table(res);
+    }
+  );
   setTimeout(() => {
     inquirer
       .prompt([
@@ -735,11 +735,10 @@ function viewByManagers() {
       WHERE employee.manager_id = ${answer.managerId};`;
         connection.query(query, (err, res) => {
           if (err) throw err;
-          console.log("\n");
-          console.log("VIEW EMPLOYEE BY MANAGER");
-          console.log("\n");
+          console.log("----------------------------------------------------------");
+          console.log("        ********** VIEW OF ALL MANAGERS **********        ");
+          console.log("----------------------------------------------------------");
           console.table(res);
-          console.log("\n");
           startInquire();
         });
       });
@@ -748,20 +747,17 @@ function viewByManagers() {
 
 function budgetByDept() {
   connection.query(
-    `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
-	                  role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
-                    department_id AS 'Dept ID#', department.dept_name AS 'Department',
-                    CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
-                    FROM employee INNER JOIN role ON role.id = employee.role_id 
-                    INNER JOIN department ON department.id = role.department_id 
-                    LEFT JOIN employee e ON employee.manager_id = e.id;`,
+    `SELECT salary AS 'Salary', dept_name AS Department
+    FROM role
+    INNER JOIN department
+    ON department_id =department.id
+    `,
     (err, res) => {
       if (err) throw err;
       console.log("--------------------");
       console.log("REFERENCE TABLE");
       console.log("--------------------");
       console.table(res);
-      console.log("\n");
     }
   ),
     setTimeout(() => {
@@ -770,22 +766,23 @@ function budgetByDept() {
           {
             type: "input",
             name: "deptName",
-            message: "(Caps Sensitive) Type in the Department to see its Total Budget.",
+            message: "Type in the Department to see its Total Utilized Budget.",
           },
         ])
         .then((answer) => {
-          const query = `SELECT SUM(salary), dept_name AS Department
+          const query = `SELECT  COUNT(last_name) AS '# of employees', SUM(salary) AS 'Utilized Budget', dept_name AS Department
         FROM role
         INNER JOIN department
         ON department_id =department.id
-        WHERE department.dept_name = '${answer.deptName}';`;
+        INNER JOIN employee
+        ON employee.role_id = role.id
+        WHERE department.dept_name LIKE '%${answer.deptName}%';`;
           connection.query(query, (err, res) => {
             if (err) throw err;
             console.log("---------------------------------------------");
-            console.log(`Total Budget of ${answer.deptName} department`);
+            console.log(`Total Utilized Budget of ${answer.deptName} department`);
             console.log("---------------------------------------------");
             console.table(res);
-            console.log("\n");
             startInquire();
           });
         });
@@ -826,7 +823,6 @@ function matchEmpToNewManager() {
       },
     ])
     .then((answer) => {
-      console.log(answer);
       if (answer.empUpdate === false) {
         startInquire();
       } else {
