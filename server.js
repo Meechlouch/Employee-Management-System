@@ -458,106 +458,97 @@ function updateEmployee() {
 }
 
 function updateManager() {
-  let query = `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
-	            role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
-              department_id AS 'Dept ID#', department.dept_name AS 'Department',
-              CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
-              FROM role 
-              LEFT JOIN employee ON employee.role_id = role.id 
-              INNER JOIN department ON department.id = role.department_id 
-              LEFT JOIN employee e ON employee.manager_id = e.id;`;
-  connection.query(query, function (err, res) {
-    if (err) throw err;
-    console.log(
-      "------------------------------------------------------------------------------------------------------------------"
-    );
-    console.log(
-      "                  *******************     USE THIS TABLE AS A REFERENCE!     *******************                  "
-    );
-    console.log(
-      "------------------------------------------------------------------------------------------------------------------"
-    );
-    console.table(res);
+  connection.query(
+    `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
+  role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
+  department_id AS 'Dept ID#', department.dept_name AS 'Department',
+  CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
+  FROM role LEFT JOIN employee ON employee.role_id = role.id 
+  INNER JOIN department ON department.id = role.department_id 
+  LEFT JOIN employee e ON employee.manager_id = e.id;`,
+    (err, res) => {
+      if (err) throw err;
+      console.log(
+        "----------------------------------------------------------------------------------------------------------------"
+      );
+      console.log(
+        "                  ******************     USE THIS TABLE AS A REFERENCE!     ******************                  "
+      );
+      console.log(
+        "----------------------------------------------------------------------------------------------------------------"
+      );
+      console.table(res);
+    }
+  ),
     connection.query(
       `SELECT employee.id AS 'ID#', CONCAT(first_name, " ", last_name) AS Managers, title AS Title, role.id AS 'Title ID#', salary AS Salary
-                      FROM employee
-                      INNER JOIN role
-                      ON role.id = role_id
-                      WHERE manager_id IS null;`,
-      function (err, res) {
+                    FROM employee
+                    INNER JOIN role
+                    ON role.id = role_id
+                    WHERE manager_id IS null;`,
+      (err, res) => {
         if (err) throw err;
         console.log("----------------------------------------------------------");
         console.log("        ********** VIEW OF ALL MANAGERS **********        ");
         console.log("----------------------------------------------------------");
         console.table(res);
       }
-    );
-  });
-  setTimeout(() => {
-    inquirer
-      .prompt([
-        {
-          type: "confirm",
-          name: "altManager",
-          message: "Would you like to update the Manager?",
-        },
-        {
-          type: "input",
-          name: "name",
-          message: "Enter the name of the Manager that you would like to update?",
-          when: (answer) => {
-            return answer.altManager === true;
+    ),
+    setTimeout(() => {
+      inquirer
+        .prompt([
+          {
+            type: "input",
+            name: "name",
+            message: "Enter the name of the Manager that you would like to update?",
           },
-        },
-        {
-          type: "number",
-          name: "roleID",
-          message: "What is the role ID number of the Title that the Manager will transfer to?",
-          when: (answer) => {
-            return answer.altManager === true;
+          {
+            type: "number",
+            name: "roleID",
+            message: "What is the role ID number of the Title that the Manager will transfer to?",
           },
-        },
-      ])
-      .then((answer) => {
-        console.log(answer);
-        if (answer.altManager === false) {
-          matchEmpToNewManager();
-        } else {
-          const query = `UPDATE employee
+          {
+            type: "confirm",
+            name: "updateManager",
+            message: "Do you need to update another Manager to fill the position of the last Manager?",
+          },
+        ])
+        .then((answer) => {
+          let query = `UPDATE employee
             SET role_id = ${answer.roleID}
             WHERE concat(employee.first_name, " ", employee.last_name) = '${answer.name}';`;
           connection.query(query, (err) => {
-            if (err) {
-              throw err;
-            } else {
-              connection.query(
-                `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
-                role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
-                department_id AS 'Dept ID#', department.dept_name AS 'Department',
-                CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
-                FROM role LEFT JOIN employee ON employee.role_id = role.id 
-                INNER JOIN department ON department.id = role.department_id 
-                LEFT JOIN employee e ON employee.manager_id = e.id;`,
-                (err, res) => {
-                  if (err) throw err;
-                  console.log(
-                    "----------------------------------------------------------------------------------------------------------------"
-                  );
-                  console.log(
-                    "                  ******************     USE THIS TABLE AS A REFERENCE!     ******************                  "
-                  );
-                  console.log(
-                    "----------------------------------------------------------------------------------------------------------------"
-                  );
-                  console.table(res);
-                  matchEmpToNewManager();
-                }
-              );
-            }
+            if (err) throw err;
           });
-        }
-      });
-  }, 1500);
+          if (answer.updateManager) {
+            updateManager();
+          } else {
+            connection.query(
+              `SELECT employee.id AS 'ID#', CONCAT(employee.first_name, " ", employee.last_name) AS 'Employees',
+            role.id AS 'Role ID#', role.title AS 'Title', role.salary AS 'Salary', 
+            department_id AS 'Dept ID#', department.dept_name AS 'Department',
+            CONCAT(e.first_name, ' ', e.last_name) AS 'Manager' 
+            FROM role LEFT JOIN employee ON employee.role_id = role.id 
+            INNER JOIN department ON department.id = role.department_id 
+            LEFT JOIN employee e ON employee.manager_id = e.id;`,
+              (err, res) => {
+                if (err) throw err;
+                console.log(
+                  "----------------------------------------------------------------------------------------------------------------"
+                );
+                console.log(
+                  "                  ******************     USE THIS TABLE AS A REFERENCE!     ******************                  "
+                );
+                console.log(
+                  "----------------------------------------------------------------------------------------------------------------"
+                );
+                console.table(res);
+                matchEmpToNewManager();
+              }
+            );
+          }
+        });
+    }, 1000);
 }
 
 function removeEmployee() {
@@ -735,9 +726,9 @@ function viewByManagers() {
       WHERE employee.manager_id = ${answer.managerId};`;
         connection.query(query, (err, res) => {
           if (err) throw err;
-          console.log("----------------------------------------------------------");
-          console.log("        ********** VIEW OF ALL MANAGERS **********        ");
-          console.log("----------------------------------------------------------");
+          console.log("-----------------------------------------------------------");
+          console.log("     ********** VIEW OF EMPLOYEE BY MANAGER **********     ");
+          console.log("-----------------------------------------------------------");
           console.table(res);
           startInquire();
         });
@@ -808,7 +799,7 @@ function matchEmpToNewManager() {
       {
         type: "number",
         name: "empID",
-        message: "What is the employee id number of employee that needs Manager update?",
+        message: "What is the employee's ID# of the employee that needs their Manager ID# updated?",
         when: (answer) => {
           return answer.empUpdate === true;
         },
@@ -853,10 +844,12 @@ function matchEmpToNewManager() {
                   "----------------------------------------------------------------------------------------------------------------"
                 );
                 console.table(res);
+
                 if (answer.moreEmps === true) {
                   matchEmpToNewManager();
+                } else {
+                  startInquire();
                 }
-                startInquire();
               }
             );
           }
