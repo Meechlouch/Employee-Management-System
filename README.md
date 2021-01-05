@@ -1,140 +1,90 @@
-# Unit 12 MySQL Homework: Employee Tracker
+  <h1 align = "center">
+  <img src="../assets/img/Meech-The-Programming-Dj.jpg" alt="Logo" title="Meech" align="center" height="137">
+  <br>
+  :star: Employee Management System :star:
+  </h1>
+  
+  ![License:](https://img.shields.io/badge/Demetri%20Dillard-MIT-brightgreen)
 
-Developers are often tasked with creating interfaces that make it easy for non-developers to view and interact with
-information stored in databases. Often these interfaces are known as **C**ontent **M**anagement **S**ystems. In this
-homework assignment, your challenge is to architect and build a solution for managing a company's employees using node,
-inquirer, and MySQL.
+# Table of Contents
 
-## Instructions
+- [Description](#description)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [Test](#test)
+- [Credits](#credits)
+- [License](#license)
+- [Questions](#questions)
 
-Design the following database schema containing three tables:
+## :memo: Description
 
-![Database Schema](Assets/schema.png)
+Employee Management System is a CLI application that allows a user to manage company records. Using mySQL, information
+about the company is saved to a database and can be accessed using node.js. Inquirer than prompts the user while tables
+are shown for the user to reference depending on the task trying to be accomplished. The EMP application has various
+functionalities to allow a user to view, create, or update company records such as view/add/delete employees, company
+roles and departments, update employee positions, managers, and manager's position and some other more powerful features
+like looking up employees by the manager or looking up the total utilize budget of a particular department. The
+application is formatted in such a way to make user readability viewable.
 
-- **department**:
+## :camera: Visuals
 
-  - **id** - INT PRIMARY KEY
-  - **name** - VARCHAR(30) to hold department name
+  <img src="../assets/img/emP.gif" width="300">
+  
+  :globe_with_meridians: Here is a video [description](https://meechlouch.github.io/Employee-Management-System/).
 
-- **role**:
+## Installation:
 
-  - **id** - INT PRIMARY KEY
-  - **title** - VARCHAR(30) to hold role title
-  - **salary** - DECIMAL to hold role salary
-  - **department_id** - INT to hold reference to department role belongs to
+    Node.js, mySQL, Inquirer, console.table, and ASCII-art-logo.
 
-- **employee**:
+## Usage:
 
-  - **id** - INT PRIMARY KEY
-  - **first_name** - VARCHAR(30) to hold employee first name
-  - **last_name** - VARCHAR(30) to hold employee last name
-  - **role_id** - INT to hold reference to role employee has
-  - **manager_id** - INT to hold reference to another employee that manages the employee being Created. This field may
-    be null if the employee has no manager
+    This application will be used via the command-line executed with the node index command. A table of the appropiate company records will display before and after Inquirer prompts, the first being a reference table and the later being a confirmation table.
 
-Build a command-line application that at a minimum allows the user to:
+## Contributing:
 
-Bonus points if you're able to:
+    None
 
-- Update employee managers
+## Test:
 
-- View the total utilized budget of a department -- ie the combined salaries of all employees in that department
+    Copy and Paste folders and files, npm i for dependancies, create mySQL database with schema.sql and populate with seed.sql, execute the node index command from the command-line.
 
-We can frame this challenge as follows:
+## Credits:
 
-```
-As a business owner
-I want to be able to view and manage the departments, roles, and employees in my company
-So that I can organize and plan my business
-```
+    None
 
-How do you deliver this? Here are some guidelines:
+## :copyright: License:
 
-- Use the [MySQL](https://www.npmjs.com/package/mysql) NPM package to connect to your MySQL database and perform
-  queries.
+This project is subject to ![License:](https://img.shields.io/badge/License-MIT-red)
 
-- Use [InquirerJs](https://www.npmjs.com/package/inquirer/v/0.2.3) NPM package to interact with the user via the
-  command-line.
+MIT License
 
-- Use [console.table](https://www.npmjs.com/package/console.table) to print MySQL rows to the console. There is a
-  built-in version of `console.table`, but the NPM package formats the data a little better for our purposes.
+        Copyright (c) [2020] [Demetri Dillard]
 
-- You may wish to have a separate file containing functions for performing specific SQL queries you'll need to use.
-  Could a constructor function or a class be helpful for organizing these?
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
 
-- You will need to perform a variety of SQL JOINS to complete this assignment, and it's recommended you review the
-  week's activities if you need a refresher on this.
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
 
-![Employee Tracker](Assets/employee-tracker.gif)
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
 
-### Hints
+For more information on this [License](https://choosealicense.com/licenses/mit/)
 
-- You may wish to include a `seed.sql` file to pre-populate your database. This will make development of individual
-  features much easier.
+## Questions:question:
 
-- Focus on getting the basic functionality completed before working on more advanced features.
+:email: For additional questions, Get in touch at: Meechlouch@gmail.com
 
-- Review the week's activities for a refresher on MySQL.
+:octocat: Check out my [GitHub](https://github.com/Meechlouch)
 
-- Check out [SQL Bolt](https://sqlbolt.com/) for some extra MySQL help.
-
-## Minimum Requirements
-
-- Functional application.
-
-- GitHub repository with a unique name and a README describing the project.
-
-- The command-line application should allow users to:
-
-  - Add departments, roles, employees
-
-  - View departments, roles, employees
-
-  - Update employee roles
-
-## Bonus
-
-- The command-line application should allow users to:
-
-  - Update employee managers
-
-  - View employees by manager
-
-  - Delete departments, roles, and employees
-
-  - View the total utilized budget of a department -- ie the combined salaries of all employees in that department
-
-## Commit Early and Often
-
-One of the most important skills to master as a web developer is version control. Building the habit of committing via
-Git is important for two reasons:
-
-- Your commit history is a signal to employers that you are actively working on projects and learning new skills.
-
-- Your commit history allows you to revert your codebase in the event that you need to return to a previous state.
-
-Follow these guidelines for committing:
-
-- Make single-purpose commits for related changes to ensure a clean, manageable history. If you are fixing two issues,
-  make two commits.
-
-- Write descriptive, meaningful commit messages so that you and anyone else looking at your repository can easily
-  understand its history.
-
-- Don't commit half-done work, for the sake of your collaborators (and your future self!).
-
-- Test your application before you commit to ensure functionality at every step in the development process.
-
-We would like you to have well over 200 commits by graduation, so commit early and often!
-
-## Submission on BCS
-
-You are required to submit the following:
-
-- The URL of the GitHub repository
-
-- A video demonstrating the entirety of the app's functionality
-
----
-
-© 2019 Trilogy Education Services, a 2U, Inc. brand. All Rights Reserved.
+:octocat: GitHub [Repository](https://github.com/Meechlouch/Employee-Management-System)

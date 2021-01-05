@@ -1,12 +1,12 @@
 INSERT INTO department (dept_name)
 VALUES ('Production'),	
-	('Sales'),
+	   ('Sales'),
        ('Accounting & Finance'),
        ('Tech and Engineering'),
        ('Human Resources'),
        ('Legal');
        
-INSERT INTO employee_tracker_db.role (title, salary, department_id)
+INSERT INTO role (title, salary, department_id)
 VALUES ('Project Manager', 87000, 1),
        ('Full-Stack Developer', 75000, 1),
        ('Back-end', 72000, 1),
