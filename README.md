@@ -1,5 +1,5 @@
   <h1 align = "center">
-  <img src="../assets/img/Meech-The-Programming-Dj.jpg" alt="Logo" title="Meech" align="center" height="137">
+  <img src="./assets/img/Meech-The-Programming-Dj.jpg" alt="Logo" title="Meech" align="center" height="137">
   <br>
   :star: Employee Management System :star:
   </h1>
@@ -29,7 +29,7 @@ application is formatted in such a way to make user readability viewable.
 
 ## :camera: Visuals
 
-  <img src="../assets/img/emP.gif" width="300">
+  <img src="./assets/img/emP.gif" width="300">
   
   :globe_with_meridians: Here is a video [description](https://meechlouch.github.io/Employee-Management-System/).
 
